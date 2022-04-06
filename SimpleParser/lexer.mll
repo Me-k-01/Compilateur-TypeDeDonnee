@@ -26,12 +26,45 @@ rule token = parse
     {advance_line lexbuf; token lexbuf }    (* white space: recursive call of lexer *)
 | comment
     { token lexbuf }    (* comment --> ignore *)
-| decimal  as i	  { INTCONSTANT (int_of_string i)}
+    
+    
+(*Retour des valeurs*)
+| decimal  as i { INTCONSTANT (int_of_string i)}
+| "true"        {BCONSTANT true}
+| "false"       {BCONSTANT false}
 
-| "return"     {RETURN}
-| "true"       {BCONSTANT true}
+(* binary arithmetic operators: +, -, *, /, mod *)
+| "+"           {BA_ADD}
+| "-"           {BA_SUB}
+| "*"           {BA_MUL}
+| "/"           {BA_DIV}
+| "mod"         {BA_MOD}
+
+(* binary comparison operators: =, >=, >, <=, <, != *)
+| "="           {BC_EG}
+| ">="          {BC_SUP_EG}
+| "<="          {BC_INF_EG}
+| ">"           {BC_SUP}
+| "<"           {BC_INF}
+| "!="          {BC_DIF}
+
+(*commentaire*)
+| "/*"          {COMM_OPEN}
+| "*/"          {COMM_CLOSE}
+| "//"          {COMM}
+
+(*parentheses*)
+| "("           {PAR_OPEN}
+| ")"           {PAR_CLOSE}
+
+
+(*autre*)
+| "return"      {RETURN}
+
+(*fin d'expression*)
 | ';'          { SEMICOLON }
 
+(*fin de fichier*)
 | eof          {EOF}
 
 | _  {Printf.printf "ERROR: unrecogized symbol '%s'\n" (Lexing.lexeme lexbuf);
