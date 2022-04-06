@@ -1,51 +1,34 @@
 (* Typechecking of source programs *)
-
 open Lang
 
-
 (* Environments *)
-let testConst = Const (0, IntV 0);;
-let testSeq = Seq
-    (Seq
-        (Cond
-            (BinOp (0, BCompar BClt, VarE (0, "n"),
-            Const (0, IntV 0)),
-            Assign (0, "n",
-            BinOp (0, BArith BAsub, Const (0, IntV 0),
-            VarE (0, "n"))),
-            Skip),
-        While
-            (BinOp (0, BCompar BCgt, VarE (0, "n"),
-            Const (0, IntV 1)),
-            Assign (0, "n",
-            BinOp (0, BArith BAsub, VarE (0, "n"),
-            Const (0, IntV 2))))),
-    Return
-        (BinOp (0, BCompar BCeq, VarE (0, "n"),
-            Const (0, IntV 0)
-        )
-    )
-);;
-let testFun = Fundefn
-    (Fundecl (BoolT, "even", [Vardecl (IntT, "n")]), 
-        [],
-        testSeq
-    )
-;;
+
 type environment = {
     localvar: (vname * tp) list; 
     returntp: tp
-};;
+}
 
 (************ Fonction ajouté ***************)
 let tpOfConst c = match c with
     | (IntV _) -> IntT
     | (BoolV _) -> BoolT
-;;
+;; (* Const -> tp *)
 
-let tpExpr expr = match expr with
+let tpOfBinOp c = match c with
+    | (BArith ari) -> IntT (* TODO: alg d'unification *)
+    | (BCompar comp) -> BoolT (* retourne toujours un booleen*)
+;; (* BinOp -> tp *)
+
+let rec tpExpr expr = match expr with
     | Const (_, value) -> Const (tpOfConst value, value)
     | VarE (_, value) -> VarE (IntT, value)
+    | BinOp (_, comp, a, b) -> 
+        let tpA = tpExpr a and tpB = tpExpr b in
+        if ((Lang.tp_of_expr tpA) = (Lang.tp_of_expr tpB)) then
+            BinOp (tpOfBinOp comp, comp, tpA, tpB) 
+        else 
+            failwith "Opération mal formée"
+    (*| IfThenElse (t, _, _, _) -> t*) (* TODO *)
 ;; (* expr -> expr *)
 
 let tpStmt stmt = 
