@@ -6,7 +6,7 @@
 (* For using the parser:
 
 - Evaluate this file (use.ml)
-- Interf.parse "Tests/simple.c" ;;
+- Interf.parse "./Tests/even.c" ;;
 
 *)
 

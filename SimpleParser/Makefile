@@ -1,5 +1,5 @@
 all: lang.cmo parser.cmo lexer.cmo interf.cmo
-
+	ocamlc -o execParser $^ 
 # Compilation of .ml files
 lang.cmo: lang.ml
 	ocamlc -c $<
@@ -30,4 +30,4 @@ parser.cmo: parser.ml parser.cmi lang.cmo
 .PHONY: clean
 
 clean: 
-	rm -f lexer.ml parser.ml *.mli *.cmi *.cmo
+	rm -f *.mli *.cmo
