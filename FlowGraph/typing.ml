@@ -31,6 +31,12 @@ let rec tpExpr expr = match expr with
     (*| IfThenElse (t, _, _, _) -> t*) (* TODO *)
 ;; (* expr -> expr *)
 
-let tpStmt stmt = 
-    stmt
+let rec tpStmt stmt = match stmt with
+    | Skip -> Skip
+    | Assign (_, vname, expr) -> Assign (IntT, vname, tpExpr expr) (* 'a * vname * ('a expr) *)
+    | Seq (a, b) -> Seq (tpStmt a, tpStmt b)  
+    | Cond (expr, a, b) -> Cond (tpExpr expr, tpStmt a, tpStmt b)
+    | While (expr, stmt) -> While (tpExpr expr, tpStmt stmt) 
+    | Return (expr) -> Return (tpExpr expr)
+  
 ;; (* stmt -> stmt *) 
