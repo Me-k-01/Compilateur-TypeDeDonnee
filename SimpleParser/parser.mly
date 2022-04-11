@@ -6,6 +6,10 @@ open Lang
 /*Value*/
 %token <bool> BCONSTANT
 %token <int> INTCONSTANT
+%token <string> VAR 
+
+/* Declaration de type */
+%token TYPE
 
 /*Binary arithmetic comparator*/
 %token BC_EG
@@ -28,17 +32,26 @@ open Lang
 /*Parenthesage*/
 %token PAR_OPEN
 %token PAR_CLOSE
+%token BRACKET_OPEN
+%token BRACKET_CLOSE
+
+/*structure de controle*/
+%token IF
+%token THEN
+%token ELSE
+%token FOR
+%token WHILE
+%token RETURN
+%token LET
+
+/*Fin expression*/
+%token SEMICOLON
+%left SEMICOLON
 
 /*Commentaire*/
 %token COMM_OPEN
 %token COMM_CLOSE
 %token COMM
-
-/*autre*/
-%token RETURN
-
-/*Fin expression*/
-%token SEMICOLON
 
 /*Fin de fichier*/
 %token EOF
@@ -64,6 +77,16 @@ constant:
 | INTCONSTANT  { Const(0, IntV $1) }
 ;
 
+/*Variables*/
+variable:
+ VAR { VarE(0, $1) }
+;
+
+/*Parenthesage*/
+parenthesage:
+  PAR_OPEN expression PAR_CLOSE  { ($2) }
+;
+
 /*Binary arithmetic operator*/
 binary_operation :
 | expression BA_ADD expression { BinOp(0, BArith BAadd, $1 , $3 ) }
@@ -81,39 +104,48 @@ binary_operation :
 | expression BC_DIF expression    { BinOp(0, BCompar BCne, $1 , $3 ) }
 ;
 
-/*Parenthesage*/
-parenthesage:
-  PAR_OPEN expression PAR_CLOSE  { ($2) }
-;
-commentaire :
-  COMM_OPEN COMM_CLOSE { }
+ifthenelse :
+  /*IF PAR_OPEN expression PAR_CLOSE BRACKET_OPEN expression BRACKET_CLOSE { IfThenElse(0, $3, $6, skip ) }*/
+| IF PAR_OPEN expression PAR_CLOSE BRACKET_OPEN expression BRACKET_CLOSE ELSE BRACKET_OPEN expression BRACKET_CLOSE { IfThenElse(0, $3, $6, $10 ) }
 ;
 
 
 /*expression globale*/
 expression :
   constant         { $1 }
+| variable         { $1 }
 | parenthesage     { $1 }
-| commentaire      { $1 }
 | binary_operation { $1 }
+| ifthenelse { $1 }
 ;
+
 
 /* *******  STATEMENTS  ******* */
 
 statement:
   skip { $1 }
+| assign { $1 }
 | return_statement { $1 }
-
+| seq { $1 }
 ;
 
+seq:
+ statement SEMICOLON statement {Seq( $1, $3 )}
+ /*RETURN expression SEMICOLON { Return $2 }*/
+;
 
+/* instanciation */
+assign:
+ VAR BC_EG constant SEMICOLON {Assign(0, $1, $3) }
+;
+
+/*retour simple*/
 return_statement: 
-  RETURN expression SEMICOLON 
-{ Return $2 }
+ RETURN expression SEMICOLON { Return $2 }
 ;
 
 /*commentaire*/
 skip:
-  COMM_OPEN COMM_CLOSE { Skip }
+  COMM_OPEN COMM_CLOSE { Skip } /*TODO - acceptez nimporte quoi entre ça*/
 | COMM { Skip }
 ;

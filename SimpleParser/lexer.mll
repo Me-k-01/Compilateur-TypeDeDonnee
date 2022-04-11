@@ -14,7 +14,7 @@
 
 }
 
-let alph =           ['a'-'z''A'-'Z']
+let alph =           ['a'-'z''A'-'Z']*
 let num  =           ['0'-'9'] 
 let decimal	=	'0'|(['1'-'9']['0'-'9']*)
 let comment = '/' '*'  '*' '/'
@@ -29,9 +29,13 @@ rule token = parse
     
     
 (*Retour des valeurs*)
-| decimal  as i { INTCONSTANT (int_of_string i)}
-| "true"        {BCONSTANT true}
-| "false"       {BCONSTANT false}
+| decimal  as i { INTCONSTANT (int_of_string i) }
+| "True"        { BCONSTANT true }
+| "False"       { BCONSTANT false }
+
+(* Declaration de type *)
+| "int"         {TYPE}
+| "bool"        {TYPE}
 
 (* binary arithmetic operators: +, -, *, /, mod *)
 | "+"           {BA_ADD}
@@ -56,13 +60,24 @@ rule token = parse
 (*parentheses*)
 | "("           {PAR_OPEN}
 | ")"           {PAR_CLOSE}
+| "{"           {BRACKET_OPEN}
+| "}"           {BRACKET_CLOSE}
 
 
-(*autre*)
+(* Structure de controle *)
+| "if"          {IF}
+| "then"        {THEN}
+| "else"        {ELSE}
+| "for"         {FOR}
+| "while"       {WHILE}
 | "return"      {RETURN}
+| "let"         {LET}
 
 (*fin d'expression*)
 | ';'          { SEMICOLON }
+
+(* Expression de variable *)
+| alph as a     { VAR a }
 
 (*fin de fichier*)
 | eof          {EOF}
