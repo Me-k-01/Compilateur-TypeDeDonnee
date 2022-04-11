@@ -31,3 +31,4 @@ let testFun = Fundefn
 ;;
 
 tpExpr testConst;;
+tpStmt testSeq;;
