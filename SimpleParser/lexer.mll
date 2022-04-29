@@ -17,7 +17,7 @@
 let alph =           ['a'-'z''A'-'Z']*
 let num  =           ['0'-'9'] 
 let decimal	=	'0'|(['1'-'9']['0'-'9']*)
-let comment = '/' '*'  '*' '/'
+let comment = '/' '*' (alph|num)* '*' '/'
   
 rule token = parse
  [' ' '\t']

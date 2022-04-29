@@ -105,8 +105,12 @@ binary_operation :
 ;
 
 ifthenelse :
-  /*IF PAR_OPEN expression PAR_CLOSE BRACKET_OPEN expression BRACKET_CLOSE { IfThenElse(0, $3, $6, skip ) }*/
-| IF PAR_OPEN expression PAR_CLOSE BRACKET_OPEN expression BRACKET_CLOSE ELSE BRACKET_OPEN expression BRACKET_CLOSE { IfThenElse(0, $3, $6, $10 ) }
+ IF expression BRACKET_OPEN expression BRACKET_CLOSE ELSE BRACKET_OPEN expression BRACKET_CLOSE { IfThenElse(0, $2, $4, $8 ) }
+;
+
+selection_statement :
+  IF PAR_OPEN expression PAR_CLOSE statement %prec ELSE {Cond( $3, $5, Skip)}
+| IF PAR_OPEN expression PAR_CLOSE  statement ELSE statement { Cond( $3, $5, $7 ) }
 ;
 
 
@@ -146,6 +150,6 @@ return_statement:
 
 /*commentaire*/
 skip:
-  COMM_OPEN COMM_CLOSE { Skip } /*TODO - acceptez nimporte quoi entre ça*/
+  COMM_OPEN    COMM_CLOSE { Skip } /*TODO - acceptez nimporte quoi entre ça*/
 | COMM { Skip }
 ;
