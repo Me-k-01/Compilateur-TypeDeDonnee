@@ -23,30 +23,37 @@
 
   17  ifthenelse : IF expression BRACKET_OPEN expression BRACKET_CLOSE ELSE BRACKET_OPEN expression BRACKET_CLOSE
 
-  18  selection_statement : IF PAR_OPEN expression PAR_CLOSE statement
-  19                      | IF PAR_OPEN expression PAR_CLOSE statement ELSE statement
+  18  expression : constant
+  19             | variable
+  20             | parenthesage
+  21             | binary_operation
+  22             | ifthenelse
 
-  20  expression : constant
-  21             | variable
-  22             | parenthesage
-  23             | binary_operation
-  24             | ifthenelse
-
-  25  statement : skip
-  26            | assign
+  23  statement : seq
+  24            | assign
+  25            | selection_statement
+  26            | while_statement
   27            | return_statement
-  28            | seq
 
-  29  seq : statement SEMICOLON statement
+  28  assign : VAR EG expression SEMICOLON
 
-  30  assign : VAR BC_EG constant SEMICOLON
+  29  seq : statement statement
 
-  31  return_statement : RETURN expression SEMICOLON
+  30  selection_statement : IF PAR_OPEN expression PAR_CLOSE statement
+  31                      | IF PAR_OPEN expression PAR_CLOSE statement ELSE statement
 
-  32  skip : COMM_OPEN COMM_CLOSE
-  33       | COMM
+  32  while_statement : WHILE PAR_OPEN expression PAR_CLOSE BRACKET_OPEN statement BRACKET_CLOSE
 
-  34  %entry% : '\001' start
+  33  return_statement : RETURN expression SEMICOLON
+
+  34  typeD : BoolT
+  35        | IntT
+
+  36  varDeclaration : typeD VAR
+
+  37  fundeclaration : typeD VAR PAR_OPEN varDeclaration PAR_CLOSE
+
+  38  %entry% : '\001' start
 
 state 0
 	$accept : . %entry% $end  (0)
@@ -58,20 +65,21 @@ state 0
 
 
 state 1
-	%entry% : '\001' . start  (34)
+	%entry% : '\001' . start  (38)
 
 	VAR  shift 3
-	RETURN  shift 4
-	COMM_OPEN  shift 5
-	COMM  shift 6
+	IF  shift 4
+	WHILE  shift 5
+	RETURN  shift 6
 	.  error
 
 	start  goto 7
 	statement  goto 8
-	skip  goto 9
+	seq  goto 9
 	assign  goto 10
-	return_statement  goto 11
-	seq  goto 12
+	selection_statement  goto 11
+	while_statement  goto 12
+	return_statement  goto 13
 
 
 state 2
@@ -81,260 +89,289 @@ state 2
 
 
 state 3
-	assign : VAR . BC_EG constant SEMICOLON  (30)
+	assign : VAR . EG expression SEMICOLON  (28)
 
-	BC_EG  shift 13
+	EG  shift 14
 	.  error
 
 
 state 4
-	return_statement : RETURN . expression SEMICOLON  (31)
+	selection_statement : IF . PAR_OPEN expression PAR_CLOSE statement  (30)
+	selection_statement : IF . PAR_OPEN expression PAR_CLOSE statement ELSE statement  (31)
 
-	BCONSTANT  shift 14
-	INTCONSTANT  shift 15
-	VAR  shift 16
-	PAR_OPEN  shift 17
-	IF  shift 18
+	PAR_OPEN  shift 15
 	.  error
-
-	constant  goto 19
-	variable  goto 20
-	parenthesage  goto 21
-	expression  goto 22
-	binary_operation  goto 23
-	ifthenelse  goto 24
 
 
 state 5
-	skip : COMM_OPEN . COMM_CLOSE  (32)
+	while_statement : WHILE . PAR_OPEN expression PAR_CLOSE BRACKET_OPEN statement BRACKET_CLOSE  (32)
 
-	COMM_CLOSE  shift 25
+	PAR_OPEN  shift 16
 	.  error
 
 
 state 6
-	skip : COMM .  (33)
+	return_statement : RETURN . expression SEMICOLON  (33)
 
-	.  reduce 33
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
+	.  error
+
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 25
+	binary_operation  goto 26
+	ifthenelse  goto 27
 
 
 state 7
-	%entry% : '\001' start .  (34)
+	%entry% : '\001' start .  (38)
 
-	.  reduce 34
+	.  reduce 38
 
 
 state 8
 	start : statement .  (1)
-	seq : statement . SEMICOLON statement  (29)
+	seq : statement . statement  (29)
 
-	SEMICOLON  shift 26
+	VAR  shift 3
+	IF  shift 4
+	WHILE  shift 5
+	RETURN  shift 6
 	$end  reduce 1
+
+	statement  goto 28
+	seq  goto 9
+	assign  goto 10
+	selection_statement  goto 11
+	while_statement  goto 12
+	return_statement  goto 13
 
 
 state 9
-	statement : skip .  (25)
+	statement : seq .  (23)
+
+	.  reduce 23
+
+
+state 10
+	statement : assign .  (24)
+
+	.  reduce 24
+
+
+state 11
+	statement : selection_statement .  (25)
 
 	.  reduce 25
 
 
-state 10
-	statement : assign .  (26)
+state 12
+	statement : while_statement .  (26)
 
 	.  reduce 26
 
 
-state 11
+state 13
 	statement : return_statement .  (27)
 
 	.  reduce 27
 
 
-state 12
-	statement : seq .  (28)
+state 14
+	assign : VAR EG . expression SEMICOLON  (28)
 
-	.  reduce 28
-
-
-state 13
-	assign : VAR BC_EG . constant SEMICOLON  (30)
-
-	BCONSTANT  shift 14
-	INTCONSTANT  shift 15
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
 	.  error
 
-	constant  goto 27
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 29
+	binary_operation  goto 26
+	ifthenelse  goto 27
 
 
-state 14
+state 15
+	selection_statement : IF PAR_OPEN . expression PAR_CLOSE statement  (30)
+	selection_statement : IF PAR_OPEN . expression PAR_CLOSE statement ELSE statement  (31)
+
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
+	.  error
+
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 30
+	binary_operation  goto 26
+	ifthenelse  goto 27
+
+
+state 16
+	while_statement : WHILE PAR_OPEN . expression PAR_CLOSE BRACKET_OPEN statement BRACKET_CLOSE  (32)
+
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
+	.  error
+
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 31
+	binary_operation  goto 26
+	ifthenelse  goto 27
+
+
+state 17
 	constant : BCONSTANT .  (2)
 
 	.  reduce 2
 
 
-state 15
+state 18
 	constant : INTCONSTANT .  (3)
 
 	.  reduce 3
 
 
-state 16
+state 19
 	variable : VAR .  (4)
 
 	.  reduce 4
 
 
-state 17
+state 20
 	parenthesage : PAR_OPEN . expression PAR_CLOSE  (5)
 
-	BCONSTANT  shift 14
-	INTCONSTANT  shift 15
-	VAR  shift 16
-	PAR_OPEN  shift 17
-	IF  shift 18
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
 	.  error
 
-	constant  goto 19
-	variable  goto 20
-	parenthesage  goto 21
-	expression  goto 28
-	binary_operation  goto 23
-	ifthenelse  goto 24
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 32
+	binary_operation  goto 26
+	ifthenelse  goto 27
 
 
-state 18
+state 21
 	ifthenelse : IF . expression BRACKET_OPEN expression BRACKET_CLOSE ELSE BRACKET_OPEN expression BRACKET_CLOSE  (17)
 
-	BCONSTANT  shift 14
-	INTCONSTANT  shift 15
-	VAR  shift 16
-	PAR_OPEN  shift 17
-	IF  shift 18
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
 	.  error
 
-	constant  goto 19
-	variable  goto 20
-	parenthesage  goto 21
-	expression  goto 29
-	binary_operation  goto 23
-	ifthenelse  goto 24
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 33
+	binary_operation  goto 26
+	ifthenelse  goto 27
 
 
-state 19
-	expression : constant .  (20)
+state 22
+	expression : constant .  (18)
+
+	.  reduce 18
+
+
+state 23
+	expression : variable .  (19)
+
+	.  reduce 19
+
+
+state 24
+	expression : parenthesage .  (20)
 
 	.  reduce 20
 
 
-state 20
-	expression : variable .  (21)
+state 25
+	binary_operation : expression . BA_ADD expression  (6)
+	binary_operation : expression . BA_SUB expression  (7)
+	binary_operation : expression . BA_MUL expression  (8)
+	binary_operation : expression . BA_DIV expression  (9)
+	binary_operation : expression . BA_MOD expression  (10)
+	binary_operation : expression . BC_EG expression  (11)
+	binary_operation : expression . BC_SUP_EG expression  (12)
+	binary_operation : expression . BC_INF_EG expression  (13)
+	binary_operation : expression . BC_SUP expression  (14)
+	binary_operation : expression . BC_INF expression  (15)
+	binary_operation : expression . BC_DIF expression  (16)
+	return_statement : RETURN expression . SEMICOLON  (33)
+
+	BC_EG  shift 34
+	BC_SUP_EG  shift 35
+	BC_INF_EG  shift 36
+	BC_SUP  shift 37
+	BC_INF  shift 38
+	BC_DIF  shift 39
+	BA_ADD  shift 40
+	BA_SUB  shift 41
+	BA_MUL  shift 42
+	BA_DIV  shift 43
+	BA_MOD  shift 44
+	SEMICOLON  shift 45
+	.  error
+
+
+state 26
+	expression : binary_operation .  (21)
 
 	.  reduce 21
 
 
-state 21
-	expression : parenthesage .  (22)
+state 27
+	expression : ifthenelse .  (22)
 
 	.  reduce 22
 
 
-state 22
-	binary_operation : expression . BA_ADD expression  (6)
-	binary_operation : expression . BA_SUB expression  (7)
-	binary_operation : expression . BA_MUL expression  (8)
-	binary_operation : expression . BA_DIV expression  (9)
-	binary_operation : expression . BA_MOD expression  (10)
-	binary_operation : expression . BC_EG expression  (11)
-	binary_operation : expression . BC_SUP_EG expression  (12)
-	binary_operation : expression . BC_INF_EG expression  (13)
-	binary_operation : expression . BC_SUP expression  (14)
-	binary_operation : expression . BC_INF expression  (15)
-	binary_operation : expression . BC_DIF expression  (16)
-	return_statement : RETURN expression . SEMICOLON  (31)
-
-	BC_EG  shift 30
-	BC_SUP_EG  shift 31
-	BC_INF_EG  shift 32
-	BC_SUP  shift 33
-	BC_INF  shift 34
-	BC_DIF  shift 35
-	BA_ADD  shift 36
-	BA_SUB  shift 37
-	BA_MUL  shift 38
-	BA_DIV  shift 39
-	BA_MOD  shift 40
-	SEMICOLON  shift 41
-	.  error
-
-
-state 23
-	expression : binary_operation .  (23)
-
-	.  reduce 23
-
-
-state 24
-	expression : ifthenelse .  (24)
-
-	.  reduce 24
-
-
-state 25
-	skip : COMM_OPEN COMM_CLOSE .  (32)
-
-	.  reduce 32
-
-
-state 26
-	seq : statement SEMICOLON . statement  (29)
+28: shift/reduce conflict (shift 3, reduce 29) on VAR
+28: shift/reduce conflict (shift 4, reduce 29) on IF
+28: shift/reduce conflict (shift 5, reduce 29) on WHILE
+28: shift/reduce conflict (shift 6, reduce 29) on RETURN
+state 28
+	seq : statement . statement  (29)
+	seq : statement statement .  (29)
 
 	VAR  shift 3
-	RETURN  shift 4
-	COMM_OPEN  shift 5
-	COMM  shift 6
-	.  error
+	IF  shift 4
+	WHILE  shift 5
+	RETURN  shift 6
+	$end  reduce 29
+	BRACKET_CLOSE  reduce 29
+	ELSE  reduce 29
 
-	statement  goto 42
-	skip  goto 9
+	statement  goto 28
+	seq  goto 9
 	assign  goto 10
-	return_statement  goto 11
-	seq  goto 12
-
-
-state 27
-	assign : VAR BC_EG constant . SEMICOLON  (30)
-
-	SEMICOLON  shift 43
-	.  error
-
-
-state 28
-	parenthesage : PAR_OPEN expression . PAR_CLOSE  (5)
-	binary_operation : expression . BA_ADD expression  (6)
-	binary_operation : expression . BA_SUB expression  (7)
-	binary_operation : expression . BA_MUL expression  (8)
-	binary_operation : expression . BA_DIV expression  (9)
-	binary_operation : expression . BA_MOD expression  (10)
-	binary_operation : expression . BC_EG expression  (11)
-	binary_operation : expression . BC_SUP_EG expression  (12)
-	binary_operation : expression . BC_INF_EG expression  (13)
-	binary_operation : expression . BC_SUP expression  (14)
-	binary_operation : expression . BC_INF expression  (15)
-	binary_operation : expression . BC_DIF expression  (16)
-
-	BC_EG  shift 30
-	BC_SUP_EG  shift 31
-	BC_INF_EG  shift 32
-	BC_SUP  shift 33
-	BC_INF  shift 34
-	BC_DIF  shift 35
-	BA_ADD  shift 36
-	BA_SUB  shift 37
-	BA_MUL  shift 38
-	BA_DIV  shift 39
-	BA_MOD  shift 40
-	PAR_CLOSE  shift 44
-	.  error
+	selection_statement  goto 11
+	while_statement  goto 12
+	return_statement  goto 13
 
 
 state 29
@@ -349,265 +386,400 @@ state 29
 	binary_operation : expression . BC_SUP expression  (14)
 	binary_operation : expression . BC_INF expression  (15)
 	binary_operation : expression . BC_DIF expression  (16)
-	ifthenelse : IF expression . BRACKET_OPEN expression BRACKET_CLOSE ELSE BRACKET_OPEN expression BRACKET_CLOSE  (17)
+	assign : VAR EG expression . SEMICOLON  (28)
 
-	BC_EG  shift 30
-	BC_SUP_EG  shift 31
-	BC_INF_EG  shift 32
-	BC_SUP  shift 33
-	BC_INF  shift 34
-	BC_DIF  shift 35
-	BA_ADD  shift 36
-	BA_SUB  shift 37
-	BA_MUL  shift 38
-	BA_DIV  shift 39
-	BA_MOD  shift 40
-	BRACKET_OPEN  shift 45
+	BC_EG  shift 34
+	BC_SUP_EG  shift 35
+	BC_INF_EG  shift 36
+	BC_SUP  shift 37
+	BC_INF  shift 38
+	BC_DIF  shift 39
+	BA_ADD  shift 40
+	BA_SUB  shift 41
+	BA_MUL  shift 42
+	BA_DIV  shift 43
+	BA_MOD  shift 44
+	SEMICOLON  shift 46
 	.  error
 
 
 state 30
-	binary_operation : expression BC_EG . expression  (11)
+	binary_operation : expression . BA_ADD expression  (6)
+	binary_operation : expression . BA_SUB expression  (7)
+	binary_operation : expression . BA_MUL expression  (8)
+	binary_operation : expression . BA_DIV expression  (9)
+	binary_operation : expression . BA_MOD expression  (10)
+	binary_operation : expression . BC_EG expression  (11)
+	binary_operation : expression . BC_SUP_EG expression  (12)
+	binary_operation : expression . BC_INF_EG expression  (13)
+	binary_operation : expression . BC_SUP expression  (14)
+	binary_operation : expression . BC_INF expression  (15)
+	binary_operation : expression . BC_DIF expression  (16)
+	selection_statement : IF PAR_OPEN expression . PAR_CLOSE statement  (30)
+	selection_statement : IF PAR_OPEN expression . PAR_CLOSE statement ELSE statement  (31)
 
-	BCONSTANT  shift 14
-	INTCONSTANT  shift 15
-	VAR  shift 16
-	PAR_OPEN  shift 17
-	IF  shift 18
+	BC_EG  shift 34
+	BC_SUP_EG  shift 35
+	BC_INF_EG  shift 36
+	BC_SUP  shift 37
+	BC_INF  shift 38
+	BC_DIF  shift 39
+	BA_ADD  shift 40
+	BA_SUB  shift 41
+	BA_MUL  shift 42
+	BA_DIV  shift 43
+	BA_MOD  shift 44
+	PAR_CLOSE  shift 47
 	.  error
-
-	constant  goto 19
-	variable  goto 20
-	parenthesage  goto 21
-	expression  goto 46
-	binary_operation  goto 23
-	ifthenelse  goto 24
 
 
 state 31
-	binary_operation : expression BC_SUP_EG . expression  (12)
+	binary_operation : expression . BA_ADD expression  (6)
+	binary_operation : expression . BA_SUB expression  (7)
+	binary_operation : expression . BA_MUL expression  (8)
+	binary_operation : expression . BA_DIV expression  (9)
+	binary_operation : expression . BA_MOD expression  (10)
+	binary_operation : expression . BC_EG expression  (11)
+	binary_operation : expression . BC_SUP_EG expression  (12)
+	binary_operation : expression . BC_INF_EG expression  (13)
+	binary_operation : expression . BC_SUP expression  (14)
+	binary_operation : expression . BC_INF expression  (15)
+	binary_operation : expression . BC_DIF expression  (16)
+	while_statement : WHILE PAR_OPEN expression . PAR_CLOSE BRACKET_OPEN statement BRACKET_CLOSE  (32)
 
-	BCONSTANT  shift 14
-	INTCONSTANT  shift 15
-	VAR  shift 16
-	PAR_OPEN  shift 17
-	IF  shift 18
+	BC_EG  shift 34
+	BC_SUP_EG  shift 35
+	BC_INF_EG  shift 36
+	BC_SUP  shift 37
+	BC_INF  shift 38
+	BC_DIF  shift 39
+	BA_ADD  shift 40
+	BA_SUB  shift 41
+	BA_MUL  shift 42
+	BA_DIV  shift 43
+	BA_MOD  shift 44
+	PAR_CLOSE  shift 48
 	.  error
-
-	constant  goto 19
-	variable  goto 20
-	parenthesage  goto 21
-	expression  goto 47
-	binary_operation  goto 23
-	ifthenelse  goto 24
 
 
 state 32
-	binary_operation : expression BC_INF_EG . expression  (13)
+	parenthesage : PAR_OPEN expression . PAR_CLOSE  (5)
+	binary_operation : expression . BA_ADD expression  (6)
+	binary_operation : expression . BA_SUB expression  (7)
+	binary_operation : expression . BA_MUL expression  (8)
+	binary_operation : expression . BA_DIV expression  (9)
+	binary_operation : expression . BA_MOD expression  (10)
+	binary_operation : expression . BC_EG expression  (11)
+	binary_operation : expression . BC_SUP_EG expression  (12)
+	binary_operation : expression . BC_INF_EG expression  (13)
+	binary_operation : expression . BC_SUP expression  (14)
+	binary_operation : expression . BC_INF expression  (15)
+	binary_operation : expression . BC_DIF expression  (16)
 
-	BCONSTANT  shift 14
-	INTCONSTANT  shift 15
-	VAR  shift 16
-	PAR_OPEN  shift 17
-	IF  shift 18
+	BC_EG  shift 34
+	BC_SUP_EG  shift 35
+	BC_INF_EG  shift 36
+	BC_SUP  shift 37
+	BC_INF  shift 38
+	BC_DIF  shift 39
+	BA_ADD  shift 40
+	BA_SUB  shift 41
+	BA_MUL  shift 42
+	BA_DIV  shift 43
+	BA_MOD  shift 44
+	PAR_CLOSE  shift 49
 	.  error
-
-	constant  goto 19
-	variable  goto 20
-	parenthesage  goto 21
-	expression  goto 48
-	binary_operation  goto 23
-	ifthenelse  goto 24
 
 
 state 33
-	binary_operation : expression BC_SUP . expression  (14)
+	binary_operation : expression . BA_ADD expression  (6)
+	binary_operation : expression . BA_SUB expression  (7)
+	binary_operation : expression . BA_MUL expression  (8)
+	binary_operation : expression . BA_DIV expression  (9)
+	binary_operation : expression . BA_MOD expression  (10)
+	binary_operation : expression . BC_EG expression  (11)
+	binary_operation : expression . BC_SUP_EG expression  (12)
+	binary_operation : expression . BC_INF_EG expression  (13)
+	binary_operation : expression . BC_SUP expression  (14)
+	binary_operation : expression . BC_INF expression  (15)
+	binary_operation : expression . BC_DIF expression  (16)
+	ifthenelse : IF expression . BRACKET_OPEN expression BRACKET_CLOSE ELSE BRACKET_OPEN expression BRACKET_CLOSE  (17)
 
-	BCONSTANT  shift 14
-	INTCONSTANT  shift 15
-	VAR  shift 16
-	PAR_OPEN  shift 17
-	IF  shift 18
+	BC_EG  shift 34
+	BC_SUP_EG  shift 35
+	BC_INF_EG  shift 36
+	BC_SUP  shift 37
+	BC_INF  shift 38
+	BC_DIF  shift 39
+	BA_ADD  shift 40
+	BA_SUB  shift 41
+	BA_MUL  shift 42
+	BA_DIV  shift 43
+	BA_MOD  shift 44
+	BRACKET_OPEN  shift 50
 	.  error
-
-	constant  goto 19
-	variable  goto 20
-	parenthesage  goto 21
-	expression  goto 49
-	binary_operation  goto 23
-	ifthenelse  goto 24
 
 
 state 34
-	binary_operation : expression BC_INF . expression  (15)
+	binary_operation : expression BC_EG . expression  (11)
 
-	BCONSTANT  shift 14
-	INTCONSTANT  shift 15
-	VAR  shift 16
-	PAR_OPEN  shift 17
-	IF  shift 18
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
 	.  error
 
-	constant  goto 19
-	variable  goto 20
-	parenthesage  goto 21
-	expression  goto 50
-	binary_operation  goto 23
-	ifthenelse  goto 24
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 51
+	binary_operation  goto 26
+	ifthenelse  goto 27
 
 
 state 35
-	binary_operation : expression BC_DIF . expression  (16)
+	binary_operation : expression BC_SUP_EG . expression  (12)
 
-	BCONSTANT  shift 14
-	INTCONSTANT  shift 15
-	VAR  shift 16
-	PAR_OPEN  shift 17
-	IF  shift 18
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
 	.  error
 
-	constant  goto 19
-	variable  goto 20
-	parenthesage  goto 21
-	expression  goto 51
-	binary_operation  goto 23
-	ifthenelse  goto 24
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 52
+	binary_operation  goto 26
+	ifthenelse  goto 27
 
 
 state 36
-	binary_operation : expression BA_ADD . expression  (6)
+	binary_operation : expression BC_INF_EG . expression  (13)
 
-	BCONSTANT  shift 14
-	INTCONSTANT  shift 15
-	VAR  shift 16
-	PAR_OPEN  shift 17
-	IF  shift 18
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
 	.  error
 
-	constant  goto 19
-	variable  goto 20
-	parenthesage  goto 21
-	expression  goto 52
-	binary_operation  goto 23
-	ifthenelse  goto 24
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 53
+	binary_operation  goto 26
+	ifthenelse  goto 27
 
 
 state 37
-	binary_operation : expression BA_SUB . expression  (7)
+	binary_operation : expression BC_SUP . expression  (14)
 
-	BCONSTANT  shift 14
-	INTCONSTANT  shift 15
-	VAR  shift 16
-	PAR_OPEN  shift 17
-	IF  shift 18
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
 	.  error
 
-	constant  goto 19
-	variable  goto 20
-	parenthesage  goto 21
-	expression  goto 53
-	binary_operation  goto 23
-	ifthenelse  goto 24
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 54
+	binary_operation  goto 26
+	ifthenelse  goto 27
 
 
 state 38
-	binary_operation : expression BA_MUL . expression  (8)
+	binary_operation : expression BC_INF . expression  (15)
 
-	BCONSTANT  shift 14
-	INTCONSTANT  shift 15
-	VAR  shift 16
-	PAR_OPEN  shift 17
-	IF  shift 18
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
 	.  error
 
-	constant  goto 19
-	variable  goto 20
-	parenthesage  goto 21
-	expression  goto 54
-	binary_operation  goto 23
-	ifthenelse  goto 24
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 55
+	binary_operation  goto 26
+	ifthenelse  goto 27
 
 
 state 39
-	binary_operation : expression BA_DIV . expression  (9)
+	binary_operation : expression BC_DIF . expression  (16)
 
-	BCONSTANT  shift 14
-	INTCONSTANT  shift 15
-	VAR  shift 16
-	PAR_OPEN  shift 17
-	IF  shift 18
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
 	.  error
 
-	constant  goto 19
-	variable  goto 20
-	parenthesage  goto 21
-	expression  goto 55
-	binary_operation  goto 23
-	ifthenelse  goto 24
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 56
+	binary_operation  goto 26
+	ifthenelse  goto 27
 
 
 state 40
-	binary_operation : expression BA_MOD . expression  (10)
+	binary_operation : expression BA_ADD . expression  (6)
 
-	BCONSTANT  shift 14
-	INTCONSTANT  shift 15
-	VAR  shift 16
-	PAR_OPEN  shift 17
-	IF  shift 18
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
 	.  error
 
-	constant  goto 19
-	variable  goto 20
-	parenthesage  goto 21
-	expression  goto 56
-	binary_operation  goto 23
-	ifthenelse  goto 24
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 57
+	binary_operation  goto 26
+	ifthenelse  goto 27
 
 
 state 41
-	return_statement : RETURN expression SEMICOLON .  (31)
+	binary_operation : expression BA_SUB . expression  (7)
 
-	.  reduce 31
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
+	.  error
+
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 58
+	binary_operation  goto 26
+	ifthenelse  goto 27
 
 
 state 42
-	seq : statement . SEMICOLON statement  (29)
-	seq : statement SEMICOLON statement .  (29)
+	binary_operation : expression BA_MUL . expression  (8)
 
-	.  reduce 29
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
+	.  error
+
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 59
+	binary_operation  goto 26
+	ifthenelse  goto 27
 
 
 state 43
-	assign : VAR BC_EG constant SEMICOLON .  (30)
+	binary_operation : expression BA_DIV . expression  (9)
 
-	.  reduce 30
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
+	.  error
+
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 60
+	binary_operation  goto 26
+	ifthenelse  goto 27
 
 
 state 44
+	binary_operation : expression BA_MOD . expression  (10)
+
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
+	.  error
+
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 61
+	binary_operation  goto 26
+	ifthenelse  goto 27
+
+
+state 45
+	return_statement : RETURN expression SEMICOLON .  (33)
+
+	.  reduce 33
+
+
+state 46
+	assign : VAR EG expression SEMICOLON .  (28)
+
+	.  reduce 28
+
+
+state 47
+	selection_statement : IF PAR_OPEN expression PAR_CLOSE . statement  (30)
+	selection_statement : IF PAR_OPEN expression PAR_CLOSE . statement ELSE statement  (31)
+
+	VAR  shift 3
+	IF  shift 4
+	WHILE  shift 5
+	RETURN  shift 6
+	.  error
+
+	statement  goto 62
+	seq  goto 9
+	assign  goto 10
+	selection_statement  goto 11
+	while_statement  goto 12
+	return_statement  goto 13
+
+
+state 48
+	while_statement : WHILE PAR_OPEN expression PAR_CLOSE . BRACKET_OPEN statement BRACKET_CLOSE  (32)
+
+	BRACKET_OPEN  shift 63
+	.  error
+
+
+state 49
 	parenthesage : PAR_OPEN expression PAR_CLOSE .  (5)
 
 	.  reduce 5
 
 
-state 45
+state 50
 	ifthenelse : IF expression BRACKET_OPEN . expression BRACKET_CLOSE ELSE BRACKET_OPEN expression BRACKET_CLOSE  (17)
 
-	BCONSTANT  shift 14
-	INTCONSTANT  shift 15
-	VAR  shift 16
-	PAR_OPEN  shift 17
-	IF  shift 18
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
 	.  error
 
-	constant  goto 19
-	variable  goto 20
-	parenthesage  goto 21
-	expression  goto 57
-	binary_operation  goto 23
-	ifthenelse  goto 24
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 64
+	binary_operation  goto 26
+	ifthenelse  goto 27
 
 
-state 46
+state 51
 	binary_operation : expression . BA_ADD expression  (6)
 	binary_operation : expression . BA_SUB expression  (7)
 	binary_operation : expression . BA_MUL expression  (8)
@@ -621,24 +793,24 @@ state 46
 	binary_operation : expression . BC_INF expression  (15)
 	binary_operation : expression . BC_DIF expression  (16)
 
-	BC_EG  shift 30
-	BC_SUP_EG  shift 31
-	BC_INF_EG  shift 32
-	BC_SUP  shift 33
-	BC_INF  shift 34
-	BC_DIF  shift 35
-	BA_ADD  shift 36
-	BA_SUB  shift 37
-	BA_MUL  shift 38
-	BA_DIV  shift 39
-	BA_MOD  shift 40
+	BC_EG  shift 34
+	BC_SUP_EG  shift 35
+	BC_INF_EG  shift 36
+	BC_SUP  shift 37
+	BC_INF  shift 38
+	BC_DIF  shift 39
+	BA_ADD  shift 40
+	BA_SUB  shift 41
+	BA_MUL  shift 42
+	BA_DIV  shift 43
+	BA_MOD  shift 44
 	PAR_CLOSE  reduce 11
 	BRACKET_OPEN  reduce 11
 	BRACKET_CLOSE  reduce 11
 	SEMICOLON  reduce 11
 
 
-state 47
+state 52
 	binary_operation : expression . BA_ADD expression  (6)
 	binary_operation : expression . BA_SUB expression  (7)
 	binary_operation : expression . BA_MUL expression  (8)
@@ -652,24 +824,24 @@ state 47
 	binary_operation : expression . BC_INF expression  (15)
 	binary_operation : expression . BC_DIF expression  (16)
 
-	BC_EG  shift 30
-	BC_SUP_EG  shift 31
-	BC_INF_EG  shift 32
-	BC_SUP  shift 33
-	BC_INF  shift 34
-	BC_DIF  shift 35
-	BA_ADD  shift 36
-	BA_SUB  shift 37
-	BA_MUL  shift 38
-	BA_DIV  shift 39
-	BA_MOD  shift 40
+	BC_EG  shift 34
+	BC_SUP_EG  shift 35
+	BC_INF_EG  shift 36
+	BC_SUP  shift 37
+	BC_INF  shift 38
+	BC_DIF  shift 39
+	BA_ADD  shift 40
+	BA_SUB  shift 41
+	BA_MUL  shift 42
+	BA_DIV  shift 43
+	BA_MOD  shift 44
 	PAR_CLOSE  reduce 12
 	BRACKET_OPEN  reduce 12
 	BRACKET_CLOSE  reduce 12
 	SEMICOLON  reduce 12
 
 
-state 48
+state 53
 	binary_operation : expression . BA_ADD expression  (6)
 	binary_operation : expression . BA_SUB expression  (7)
 	binary_operation : expression . BA_MUL expression  (8)
@@ -683,24 +855,24 @@ state 48
 	binary_operation : expression . BC_INF expression  (15)
 	binary_operation : expression . BC_DIF expression  (16)
 
-	BC_EG  shift 30
-	BC_SUP_EG  shift 31
-	BC_INF_EG  shift 32
-	BC_SUP  shift 33
-	BC_INF  shift 34
-	BC_DIF  shift 35
-	BA_ADD  shift 36
-	BA_SUB  shift 37
-	BA_MUL  shift 38
-	BA_DIV  shift 39
-	BA_MOD  shift 40
+	BC_EG  shift 34
+	BC_SUP_EG  shift 35
+	BC_INF_EG  shift 36
+	BC_SUP  shift 37
+	BC_INF  shift 38
+	BC_DIF  shift 39
+	BA_ADD  shift 40
+	BA_SUB  shift 41
+	BA_MUL  shift 42
+	BA_DIV  shift 43
+	BA_MOD  shift 44
 	PAR_CLOSE  reduce 13
 	BRACKET_OPEN  reduce 13
 	BRACKET_CLOSE  reduce 13
 	SEMICOLON  reduce 13
 
 
-state 49
+state 54
 	binary_operation : expression . BA_ADD expression  (6)
 	binary_operation : expression . BA_SUB expression  (7)
 	binary_operation : expression . BA_MUL expression  (8)
@@ -714,24 +886,24 @@ state 49
 	binary_operation : expression . BC_INF expression  (15)
 	binary_operation : expression . BC_DIF expression  (16)
 
-	BC_EG  shift 30
-	BC_SUP_EG  shift 31
-	BC_INF_EG  shift 32
-	BC_SUP  shift 33
-	BC_INF  shift 34
-	BC_DIF  shift 35
-	BA_ADD  shift 36
-	BA_SUB  shift 37
-	BA_MUL  shift 38
-	BA_DIV  shift 39
-	BA_MOD  shift 40
+	BC_EG  shift 34
+	BC_SUP_EG  shift 35
+	BC_INF_EG  shift 36
+	BC_SUP  shift 37
+	BC_INF  shift 38
+	BC_DIF  shift 39
+	BA_ADD  shift 40
+	BA_SUB  shift 41
+	BA_MUL  shift 42
+	BA_DIV  shift 43
+	BA_MOD  shift 44
 	PAR_CLOSE  reduce 14
 	BRACKET_OPEN  reduce 14
 	BRACKET_CLOSE  reduce 14
 	SEMICOLON  reduce 14
 
 
-state 50
+state 55
 	binary_operation : expression . BA_ADD expression  (6)
 	binary_operation : expression . BA_SUB expression  (7)
 	binary_operation : expression . BA_MUL expression  (8)
@@ -745,24 +917,24 @@ state 50
 	binary_operation : expression BC_INF expression .  (15)
 	binary_operation : expression . BC_DIF expression  (16)
 
-	BC_EG  shift 30
-	BC_SUP_EG  shift 31
-	BC_INF_EG  shift 32
-	BC_SUP  shift 33
-	BC_INF  shift 34
-	BC_DIF  shift 35
-	BA_ADD  shift 36
-	BA_SUB  shift 37
-	BA_MUL  shift 38
-	BA_DIV  shift 39
-	BA_MOD  shift 40
+	BC_EG  shift 34
+	BC_SUP_EG  shift 35
+	BC_INF_EG  shift 36
+	BC_SUP  shift 37
+	BC_INF  shift 38
+	BC_DIF  shift 39
+	BA_ADD  shift 40
+	BA_SUB  shift 41
+	BA_MUL  shift 42
+	BA_DIV  shift 43
+	BA_MOD  shift 44
 	PAR_CLOSE  reduce 15
 	BRACKET_OPEN  reduce 15
 	BRACKET_CLOSE  reduce 15
 	SEMICOLON  reduce 15
 
 
-state 51
+state 56
 	binary_operation : expression . BA_ADD expression  (6)
 	binary_operation : expression . BA_SUB expression  (7)
 	binary_operation : expression . BA_MUL expression  (8)
@@ -776,24 +948,24 @@ state 51
 	binary_operation : expression . BC_DIF expression  (16)
 	binary_operation : expression BC_DIF expression .  (16)
 
-	BC_EG  shift 30
-	BC_SUP_EG  shift 31
-	BC_INF_EG  shift 32
-	BC_SUP  shift 33
-	BC_INF  shift 34
-	BC_DIF  shift 35
-	BA_ADD  shift 36
-	BA_SUB  shift 37
-	BA_MUL  shift 38
-	BA_DIV  shift 39
-	BA_MOD  shift 40
+	BC_EG  shift 34
+	BC_SUP_EG  shift 35
+	BC_INF_EG  shift 36
+	BC_SUP  shift 37
+	BC_INF  shift 38
+	BC_DIF  shift 39
+	BA_ADD  shift 40
+	BA_SUB  shift 41
+	BA_MUL  shift 42
+	BA_DIV  shift 43
+	BA_MOD  shift 44
 	PAR_CLOSE  reduce 16
 	BRACKET_OPEN  reduce 16
 	BRACKET_CLOSE  reduce 16
 	SEMICOLON  reduce 16
 
 
-state 52
+state 57
 	binary_operation : expression . BA_ADD expression  (6)
 	binary_operation : expression BA_ADD expression .  (6)
 	binary_operation : expression . BA_SUB expression  (7)
@@ -807,9 +979,9 @@ state 52
 	binary_operation : expression . BC_INF expression  (15)
 	binary_operation : expression . BC_DIF expression  (16)
 
-	BA_MUL  shift 38
-	BA_DIV  shift 39
-	BA_MOD  shift 40
+	BA_MUL  shift 42
+	BA_DIV  shift 43
+	BA_MOD  shift 44
 	BC_EG  reduce 6
 	BC_SUP_EG  reduce 6
 	BC_INF_EG  reduce 6
@@ -824,7 +996,7 @@ state 52
 	SEMICOLON  reduce 6
 
 
-state 53
+state 58
 	binary_operation : expression . BA_ADD expression  (6)
 	binary_operation : expression . BA_SUB expression  (7)
 	binary_operation : expression BA_SUB expression .  (7)
@@ -838,9 +1010,9 @@ state 53
 	binary_operation : expression . BC_INF expression  (15)
 	binary_operation : expression . BC_DIF expression  (16)
 
-	BA_MUL  shift 38
-	BA_DIV  shift 39
-	BA_MOD  shift 40
+	BA_MUL  shift 42
+	BA_DIV  shift 43
+	BA_MOD  shift 44
 	BC_EG  reduce 7
 	BC_SUP_EG  reduce 7
 	BC_INF_EG  reduce 7
@@ -855,7 +1027,7 @@ state 53
 	SEMICOLON  reduce 7
 
 
-state 54
+state 59
 	binary_operation : expression . BA_ADD expression  (6)
 	binary_operation : expression . BA_SUB expression  (7)
 	binary_operation : expression . BA_MUL expression  (8)
@@ -872,7 +1044,7 @@ state 54
 	.  reduce 8
 
 
-state 55
+state 60
 	binary_operation : expression . BA_ADD expression  (6)
 	binary_operation : expression . BA_SUB expression  (7)
 	binary_operation : expression . BA_MUL expression  (8)
@@ -889,7 +1061,7 @@ state 55
 	.  reduce 9
 
 
-state 56
+state 61
 	binary_operation : expression . BA_ADD expression  (6)
 	binary_operation : expression . BA_SUB expression  (7)
 	binary_operation : expression . BA_MUL expression  (8)
@@ -906,7 +1078,45 @@ state 56
 	.  reduce 10
 
 
-state 57
+state 62
+	seq : statement . statement  (29)
+	selection_statement : IF PAR_OPEN expression PAR_CLOSE statement .  (30)
+	selection_statement : IF PAR_OPEN expression PAR_CLOSE statement . ELSE statement  (31)
+
+	IF  shift 4
+	ELSE  shift 65
+	WHILE  shift 5
+	RETURN  shift 6
+	$end  reduce 30
+	VAR  reduce 30
+	BRACKET_CLOSE  reduce 30
+
+	statement  goto 28
+	seq  goto 9
+	assign  goto 10
+	selection_statement  goto 11
+	while_statement  goto 12
+	return_statement  goto 13
+
+
+state 63
+	while_statement : WHILE PAR_OPEN expression PAR_CLOSE BRACKET_OPEN . statement BRACKET_CLOSE  (32)
+
+	VAR  shift 3
+	IF  shift 4
+	WHILE  shift 5
+	RETURN  shift 6
+	.  error
+
+	statement  goto 66
+	seq  goto 9
+	assign  goto 10
+	selection_statement  goto 11
+	while_statement  goto 12
+	return_statement  goto 13
+
+
+state 64
 	binary_operation : expression . BA_ADD expression  (6)
 	binary_operation : expression . BA_SUB expression  (7)
 	binary_operation : expression . BA_MUL expression  (8)
@@ -920,54 +1130,116 @@ state 57
 	binary_operation : expression . BC_DIF expression  (16)
 	ifthenelse : IF expression BRACKET_OPEN expression . BRACKET_CLOSE ELSE BRACKET_OPEN expression BRACKET_CLOSE  (17)
 
-	BC_EG  shift 30
-	BC_SUP_EG  shift 31
-	BC_INF_EG  shift 32
-	BC_SUP  shift 33
-	BC_INF  shift 34
-	BC_DIF  shift 35
-	BA_ADD  shift 36
-	BA_SUB  shift 37
-	BA_MUL  shift 38
-	BA_DIV  shift 39
-	BA_MOD  shift 40
-	BRACKET_CLOSE  shift 58
+	BC_EG  shift 34
+	BC_SUP_EG  shift 35
+	BC_INF_EG  shift 36
+	BC_SUP  shift 37
+	BC_INF  shift 38
+	BC_DIF  shift 39
+	BA_ADD  shift 40
+	BA_SUB  shift 41
+	BA_MUL  shift 42
+	BA_DIV  shift 43
+	BA_MOD  shift 44
+	BRACKET_CLOSE  shift 67
 	.  error
 
 
-state 58
+state 65
+	selection_statement : IF PAR_OPEN expression PAR_CLOSE statement ELSE . statement  (31)
+
+	VAR  shift 3
+	IF  shift 4
+	WHILE  shift 5
+	RETURN  shift 6
+	.  error
+
+	statement  goto 68
+	seq  goto 9
+	assign  goto 10
+	selection_statement  goto 11
+	while_statement  goto 12
+	return_statement  goto 13
+
+
+state 66
+	seq : statement . statement  (29)
+	while_statement : WHILE PAR_OPEN expression PAR_CLOSE BRACKET_OPEN statement . BRACKET_CLOSE  (32)
+
+	VAR  shift 3
+	BRACKET_CLOSE  shift 69
+	IF  shift 4
+	WHILE  shift 5
+	RETURN  shift 6
+	.  error
+
+	statement  goto 28
+	seq  goto 9
+	assign  goto 10
+	selection_statement  goto 11
+	while_statement  goto 12
+	return_statement  goto 13
+
+
+state 67
 	ifthenelse : IF expression BRACKET_OPEN expression BRACKET_CLOSE . ELSE BRACKET_OPEN expression BRACKET_CLOSE  (17)
 
-	ELSE  shift 59
+	ELSE  shift 70
 	.  error
 
 
-state 59
+state 68
+	seq : statement . statement  (29)
+	selection_statement : IF PAR_OPEN expression PAR_CLOSE statement ELSE statement .  (31)
+
+	IF  shift 4
+	WHILE  shift 5
+	RETURN  shift 6
+	$end  reduce 31
+	VAR  reduce 31
+	BRACKET_CLOSE  reduce 31
+	ELSE  reduce 31
+
+	statement  goto 28
+	seq  goto 9
+	assign  goto 10
+	selection_statement  goto 11
+	while_statement  goto 12
+	return_statement  goto 13
+
+
+state 69
+	while_statement : WHILE PAR_OPEN expression PAR_CLOSE BRACKET_OPEN statement BRACKET_CLOSE .  (32)
+
+	.  reduce 32
+
+
+state 70
 	ifthenelse : IF expression BRACKET_OPEN expression BRACKET_CLOSE ELSE . BRACKET_OPEN expression BRACKET_CLOSE  (17)
 
-	BRACKET_OPEN  shift 60
+	BRACKET_OPEN  shift 71
 	.  error
 
 
-state 60
+state 71
 	ifthenelse : IF expression BRACKET_OPEN expression BRACKET_CLOSE ELSE BRACKET_OPEN . expression BRACKET_CLOSE  (17)
 
-	BCONSTANT  shift 14
-	INTCONSTANT  shift 15
-	VAR  shift 16
-	PAR_OPEN  shift 17
-	IF  shift 18
+	BCONSTANT  shift 17
+	INTCONSTANT  shift 18
+	VAR  shift 19
+	PAR_OPEN  shift 20
+	IF  shift 21
 	.  error
 
-	constant  goto 19
-	variable  goto 20
-	parenthesage  goto 21
-	expression  goto 61
-	binary_operation  goto 23
-	ifthenelse  goto 24
+	constant  goto 22
+	variable  goto 23
+	parenthesage  goto 24
+	expression  goto 72
+	binary_operation  goto 26
+	ifthenelse  goto 27
 
 
-state 61
+state 72
 	binary_operation : expression . BA_ADD expression  (6)
 	binary_operation : expression . BA_SUB expression  (7)
 	binary_operation : expression . BA_MUL expression  (8)
@@ -981,31 +1253,36 @@ state 61
 	binary_operation : expression . BC_DIF expression  (16)
 	ifthenelse : IF expression BRACKET_OPEN expression BRACKET_CLOSE ELSE BRACKET_OPEN expression . BRACKET_CLOSE  (17)
 
-	BC_EG  shift 30
-	BC_SUP_EG  shift 31
-	BC_INF_EG  shift 32
-	BC_SUP  shift 33
-	BC_INF  shift 34
-	BC_DIF  shift 35
-	BA_ADD  shift 36
-	BA_SUB  shift 37
-	BA_MUL  shift 38
-	BA_DIV  shift 39
-	BA_MOD  shift 40
-	BRACKET_CLOSE  shift 62
+	BC_EG  shift 34
+	BC_SUP_EG  shift 35
+	BC_INF_EG  shift 36
+	BC_SUP  shift 37
+	BC_INF  shift 38
+	BC_DIF  shift 39
+	BA_ADD  shift 40
+	BA_SUB  shift 41
+	BA_MUL  shift 42
+	BA_DIV  shift 43
+	BA_MOD  shift 44
+	BRACKET_CLOSE  shift 73
 	.  error
 
 
-state 62
+state 73
 	ifthenelse : IF expression BRACKET_OPEN expression BRACKET_CLOSE ELSE BRACKET_OPEN expression BRACKET_CLOSE .  (17)
 
 	.  reduce 17
 
 
 Rules never reduced:
-	selection_statement : IF PAR_OPEN expression PAR_CLOSE statement  (18)
-	selection_statement : IF PAR_OPEN expression PAR_CLOSE statement ELSE statement  (19)
+	typeD : BoolT  (34)
+	typeD : IntT  (35)
+	varDeclaration : typeD VAR  (36)
+	fundeclaration : typeD VAR PAR_OPEN varDeclaration PAR_CLOSE  (37)
 
 
-34 terminals, 15 nonterminals
-35 grammar rules, 63 states
+State 28 contains 4 shift/reduce conflicts.
+
+
+34 terminals, 18 nonterminals
+39 grammar rules, 74 states

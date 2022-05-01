@@ -17,15 +17,18 @@
 let alph =           ['a'-'z''A'-'Z']*
 let num  =           ['0'-'9'] 
 let decimal	=	'0'|(['1'-'9']['0'-'9']*)
-let comment = '/' '*' (alph|num)* '*' '/'
+(*let comment = '/' '*' (alph|num)?* '*' '/'*)
+let commentBegin = '/' '*'
+let commentEnd = '*' '/'
   
 rule token = parse
  [' ' '\t']
     { token lexbuf }    (* white space: recursive call of lexer *)
 |'\n'
     {advance_line lexbuf; token lexbuf }    (* white space: recursive call of lexer *)
-| comment
-    { token lexbuf }    (* comment --> ignore *)
+| commentBegin
+    { comment lexbuf }    (* comment --> ignore *)
+| "//" { commentLigne lexbuf}
     
     
 (*Retour des valeurs*)
@@ -34,8 +37,11 @@ rule token = parse
 | "False"       { BCONSTANT false }
 
 (* Declaration de type *)
-| "int"         {TYPE}
-| "bool"        {TYPE}
+| "int"         { IntT IntT }
+| "bool"        {BoolT BoolT}
+
+(* Virgule *)
+| ","           {COMMA}
 
 (* binary arithmetic operators: +, -, *, /, mod *)
 | "+"           {BA_ADD}
@@ -44,18 +50,13 @@ rule token = parse
 | "/"           {BA_DIV}
 | "mod"         {BA_MOD}
 
-(* binary comparison operators: =, >=, >, <=, <, != *)
-| "="           {BC_EG}
+(* binary comparison operators: ==, >=, >, <=, <, != *)
+| "=="           {BC_EG}
 | ">="          {BC_SUP_EG}
 | "<="          {BC_INF_EG}
 | ">"           {BC_SUP}
 | "<"           {BC_INF}
 | "!="          {BC_DIF}
-
-(*commentaire*)
-| "/*"          {COMM_OPEN}
-| "*/"          {COMM_CLOSE}
-| "//"          {COMM}
 
 (*parentheses*)
 | "("           {PAR_OPEN}
@@ -74,13 +75,14 @@ rule token = parse
 | "let"         {LET}
 
 (*fin d'expression*)
-| ';'          { SEMICOLON }
+| ';'           { SEMICOLON }
 
 (* Expression de variable *)
 | alph as a     { VAR a }
+| "="           { EG }
 
 (*fin de fichier*)
-| eof          {EOF}
+| eof           {EOF}
 
 | _  {Printf.printf "ERROR: unrecogized symbol '%s'\n" (Lexing.lexeme lexbuf);
       raise Lexerror }
@@ -89,3 +91,14 @@ and
     ruleTail acc = parse
 | eof { acc }
 | _* as str { ruleTail (acc ^ str) lexbuf }
+
+and (*gestion des commentaires*)
+    comment = parse
+| commentEnd { token lexbuf }
+| _    { comment lexbuf }
+|eof   { failwith " '*/' is missing. Never ending comment"}
+
+and
+      commentLigne = parse
+| "\n" { token lexbuf }
+| _    { commentLigne lexbuf }

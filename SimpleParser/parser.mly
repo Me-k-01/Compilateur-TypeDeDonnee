@@ -6,10 +6,15 @@ open Lang
 /*Value*/
 %token <bool> BCONSTANT
 %token <int> INTCONSTANT
-%token <string> VAR 
+%token <string> VAR
+%right VAR
 
 /* Declaration de type */
-%token TYPE
+%token BoolT
+%token IntT
+
+/* Virgule */
+%token COMMA
 
 /*Binary arithmetic comparator*/
 %token BC_EG
@@ -43,26 +48,23 @@ open Lang
 %token WHILE
 %token RETURN
 %token LET
+%right IF THEN ELSE FOR WHILE RETURN LET
 
 /*Fin expression*/
 %token SEMICOLON
 %left SEMICOLON
 
-/*Commentaire*/
-%token COMM_OPEN
-%token COMM_CLOSE
-%token COMM
+/*attribution*/
+%token EG
 
 /*Fin de fichier*/
 %token EOF
 
 
 %start start
-/* TODO: For complete grammar, comment in this line:
-%type <int Lang.fundefn> start
-  */
 
-%type <int Lang.stmt> start
+%type <int Lang.fundefn> start
+/*%type <int Lang.stmt> start*/
     
 %%
 
@@ -108,39 +110,44 @@ ifthenelse :
  IF expression BRACKET_OPEN expression BRACKET_CLOSE ELSE BRACKET_OPEN expression BRACKET_CLOSE { IfThenElse(0, $2, $4, $8 ) }
 ;
 
-selection_statement :
-  IF PAR_OPEN expression PAR_CLOSE statement %prec ELSE {Cond( $3, $5, Skip)}
-| IF PAR_OPEN expression PAR_CLOSE  statement ELSE statement { Cond( $3, $5, $7 ) }
-;
-
-
 /*expression globale*/
 expression :
   constant         { $1 }
 | variable         { $1 }
 | parenthesage     { $1 }
 | binary_operation { $1 }
-| ifthenelse { $1 }
+| ifthenelse       { $1 }
 ;
 
 
 /* *******  STATEMENTS  ******* */
 
 statement:
-  skip { $1 }
-| assign { $1 }
-| return_statement { $1 }
-| seq { $1 }
-;
-
-seq:
- statement SEMICOLON statement {Seq( $1, $3 )}
- /*RETURN expression SEMICOLON { Return $2 }*/
+| seq                 { $1 }
+| assign              { $1 }
+| selection_statement { $1 }
+| while_statement     { $1 }
+| return_statement    { $1 }
 ;
 
 /* instanciation */
 assign:
- VAR BC_EG constant SEMICOLON {Assign(0, $1, $3) }
+ VAR EG expression SEMICOLON {Assign(0, $1, $3) }
+;
+
+seq:
+ statement statement { Seq( $1, $2 ) }
+;
+
+
+
+selection_statement :
+  IF PAR_OPEN expression PAR_CLOSE statement %prec ELSE      { Cond( $3, $5, Skip)}
+| IF PAR_OPEN expression PAR_CLOSE  statement ELSE statement { Cond( $3, $5, $7 ) }
+;
+
+while_statement:
+  WHILE PAR_OPEN expression PAR_CLOSE BRACKET_OPEN statement BRACKET_CLOSE { While($3, $6) }
 ;
 
 /*retour simple*/
@@ -148,8 +155,17 @@ return_statement:
  RETURN expression SEMICOLON { Return $2 }
 ;
 
-/*commentaire*/
-skip:
-  COMM_OPEN    COMM_CLOSE { Skip } /*TODO - acceptez nimporte quoi entre ça*/
-| COMM { Skip }
+/* *******  FUN DEF  ******* */
+typeD:
+  | BoolT {}
+  | IntT  {}
+;
+
+varDeclaration:
+  | typeD VAR       { Vardecl(0, $2)}
+;
+
+fundeclaration:
+  typeD VAR PAR_OPEN varDeclaration PAR_CLOSE { Fundecl( $1, $2, [$4] ) }
+
 ;
