@@ -12,22 +12,23 @@
   let advance_line lexbuf =
     lexbuf.lex_curr_p <- advance_line_pos lexbuf.lex_curr_p
 
+  let level = ref 0
+
 }
 
 let alph =           ['a'-'z''A'-'Z']*
 let num  =           ['0'-'9'] 
 let decimal	=	'0'|(['1'-'9']['0'-'9']*)
 (*let comment = '/' '*' (alph|num)?* '*' '/'*)
-let commentBegin = '/' '*'
-let commentEnd = '*' '/'
-  
+
+
 rule token = parse
  [' ' '\t']
     { token lexbuf }    (* white space: recursive call of lexer *)
 |'\n'
     {advance_line lexbuf; token lexbuf }    (* white space: recursive call of lexer *)
-| commentBegin
-    { comment lexbuf }    (* comment --> ignore *)
+| "/*"
+    {  level:=1; comment lexbuf }    (* comment --> ignore *)
 | "//" { commentLigne lexbuf}
     
     
@@ -37,8 +38,8 @@ rule token = parse
 | "False"       { BCONSTANT false }
 
 (* Declaration de type *)
-| "int"         { IntT IntT }
-| "bool"        {BoolT BoolT}
+| "int"         { IntT }
+| "bool"        {BoolT }
 
 (* Virgule *)
 | ","           {COMMA}
@@ -94,7 +95,8 @@ and
 
 and (*gestion des commentaires*)
     comment = parse
-| commentEnd { token lexbuf }
+| "*/" { decr level; if !level>0 then comment lexbuf else token lexbuf}
+| "/*" { incr level; comment lexbuf }
 | _    { comment lexbuf }
 |eof   { failwith " '*/' is missing. Never ending comment"}
 

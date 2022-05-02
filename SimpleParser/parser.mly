@@ -15,6 +15,7 @@ open Lang
 
 /* Virgule */
 %token COMMA
+%right COMMA
 
 /*Binary arithmetic comparator*/
 %token BC_EG
@@ -65,10 +66,10 @@ open Lang
 
 %type <int Lang.fundefn> start
 /*%type <int Lang.stmt> start*/
-    
+
 %%
 
-start: statement { $1 }
+start: funDefinition { $1 }
 ;
 
 /* *******  EXPRESSIONS  ******* */
@@ -122,50 +123,63 @@ expression :
 
 /* *******  STATEMENTS  ******* */
 
-statement:
+stmt:
 | seq                 { $1 }
+| return_statement    { $1 }
+| while_statement     { $1 }
 | assign              { $1 }
 | selection_statement { $1 }
-| while_statement     { $1 }
+;
+
+stmt2:
 | return_statement    { $1 }
+| while_statement     { $1 }
+| assign              { $1 }
 ;
 
 /* instanciation */
 assign:
- VAR EG expression SEMICOLON {Assign(0, $1, $3) }
+ VAR EG expression SEMICOLON { Assign (0, $1, $3) }
 ;
 
 seq:
- statement statement { Seq( $1, $2 ) }
+ stmt stmt  { Seq( $1, $2 ) }
 ;
 
-
-
 selection_statement :
-  IF PAR_OPEN expression PAR_CLOSE statement %prec ELSE      { Cond( $3, $5, Skip)}
-| IF PAR_OPEN expression PAR_CLOSE  statement ELSE statement { Cond( $3, $5, $7 ) }
+  IF PAR_OPEN expression PAR_CLOSE stmt2 %prec ELSE  { Cond( $3, $5, Skip)}
+| IF PAR_OPEN expression PAR_CLOSE BRACKET_OPEN stmt BRACKET_CLOSE ELSE BRACKET_OPEN stmt BRACKET_CLOSE  { Cond( $3, $6, $10 ) }
 ;
 
 while_statement:
-  WHILE PAR_OPEN expression PAR_CLOSE BRACKET_OPEN statement BRACKET_CLOSE { While($3, $6) }
+  WHILE PAR_OPEN expression PAR_CLOSE BRACKET_OPEN stmt BRACKET_CLOSE { While($3, $6) }
 ;
 
 /*retour simple*/
-return_statement: 
+return_statement:
  RETURN expression SEMICOLON { Return $2 }
 ;
 
+
 /* *******  FUN DEF  ******* */
 typeD:
-  | BoolT {}
-  | IntT  {}
+  | BoolT { BoolT }
+  | IntT  { IntT }
 ;
 
 varDeclaration:
-  | typeD VAR       { Vardecl(0, $2)}
+  | typeD VAR { Vardecl($1, $2) }
 ;
 
-fundeclaration:
-  typeD VAR PAR_OPEN varDeclaration PAR_CLOSE { Fundecl( $1, $2, [$4] ) }
+varListe:
+  | varDeclaration  { [$1] }
+  | varDeclaration COMMA varListe { [$1] @ $3 }
+;
 
+funDeclaration:
+  typeD VAR PAR_OPEN varListe PAR_CLOSE { Fundecl( $1, $2, $4 ) }
+;
+
+funDefinition:
+  funDeclaration BRACKET_OPEN stmt BRACKET_CLOSE { Fundefn($1, [], $3) }
 ;

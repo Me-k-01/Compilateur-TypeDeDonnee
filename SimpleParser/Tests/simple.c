@@ -17,6 +17,8 @@ if 4 == a+2 {
     a = a+2;
 }
 */
+
+bool even (int n, bool t) {
     if (n < 0)
         /* no unary expressions available ... */
         n = 0 - n;
@@ -26,4 +28,5 @@ if 4 == a+2 {
         }
 
     return (n == 0) ;
+}
 
