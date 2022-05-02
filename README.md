@@ -26,5 +26,5 @@ Documentation et Compilateur Officiel OcamL :
 - [Parser](https://github.com/ocaml/ocaml/blob/trunk/lex/parser.mly)  
 - [Lexer](https://github.com/ocaml/ocaml/blob/trunk/lex/lexer.mll)  
 
-Supplement de cours :   
-[Cours de l'INRIT](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwjhrtGnpMH3AhVTgf0HHegJA2wQFnoECAMQAQ&url=https%3A%2F%2Fwww.irit.fr%2F~Armelle.Bonenfant%2FEnseignement%2FDoc%2FtutoOcamlLexYacc.pdf&usg=AOvVaw3OCS0r4p7RZw75c4EtBTh7)
+Supplement de cours - Laboratoire de Recherche en Informatique :   
+[Cours de Lri](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwjo_JPYpsH3AhUDCewKHda7C2EQFnoECAkQAQ&url=https%3A%2F%2Fwww.lri.fr%2F~conchon%2FOMED%2F3%2Focamllex.pdf&usg=AOvVaw2F3Rk2C4Zm999iNqFC1rU5)
