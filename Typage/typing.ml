@@ -34,7 +34,14 @@ let rec tpExpr expr = match expr with
             BinOp (tpOfBinOp comp, comp, tpA, tpB) 
         else
             failwith "Opération mal formée"
-    (*| IfThenElse (t, _, _, _) -> t*) (* TODO *)
+    | IfThenElse (_, cond, a, b) -> 
+        let tpA = tpExpr a and tpB = tpExpr b in
+        let t = Lang.tp_of_expr tpA in
+        (* On vérifie que l'opération est correctement typée *)
+        if (t = (Lang.tp_of_expr tpB)) then 
+            IfThenElse (t, tpExpr cond, tpA, tpB) 
+        else
+            failwith "Opération mal formée"
 ;; (* expr -> expr *)
 
 let rec tpStmt stmt = match stmt with
