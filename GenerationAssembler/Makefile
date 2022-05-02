@@ -2,14 +2,14 @@ all: comp
 
 # Compilation of Ocaml files
 # Attention: order of object files important 
-comp: lang.cmo instrs.cmo
+comp: lang.cmo gen.cmo
 	ocamlc -o comp $^
 
 # Compilation of .ml files
 lang.cmo: ../FlowGraph/lang.ml
 	ocamlc -o lang.cmo -c $<
 
-instrs.cmo: instrs.ml lang.cmo
+gen.cmo:  gen.ml lang.cmo
 	ocamlc -c $<
 
 #### Generic rules
@@ -17,4 +17,4 @@ instrs.cmo: instrs.ml lang.cmo
 .PHONY: clean
 
 clean: 
-	rm -f *.cmo *.cmi
+	rm -f *.cmo
