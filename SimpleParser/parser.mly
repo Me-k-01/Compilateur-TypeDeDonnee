@@ -143,7 +143,8 @@ assign:
 ;
 
 seq:
- stmt stmt  { Seq( $1, $2 ) }
+ | stmt stmt stmt {Seq( Seq( $1, $2), $3) }
+ |stmt stmt  { Seq( $1, $2 ) }
 ;
 
 selection_statement :
