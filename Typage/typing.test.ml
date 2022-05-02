@@ -5,11 +5,14 @@ let testConst = Const (0, IntV 0);;
 let testSeq = Seq
     (Seq
         (Cond
-            (BinOp (0, BCompar BClt, VarE (0, "n"),
+            (BinOp (0, BCompar BClt, 
+              VarE (0, "n"),
               Const (0, IntV 0)),
             Assign (0, "n",
-            BinOp (0, BArith BAsub, Const (0, IntV 0),
-              VarE (0, "n"))),
+            BinOp (0, BArith BAsub, 
+              Const (0, IntV 0),
+              VarE (0, "n")
+            )),
             Skip),
         While
             (BinOp (0, BCompar BCgt, VarE (0, "n"),
@@ -23,6 +26,7 @@ let testSeq = Seq
         )
     )
 );;
+
 let testFun = Fundefn
     (Fundecl (BoolT, "even", [Vardecl (IntT, "n")]), 
         [],
@@ -32,3 +36,4 @@ let testFun = Fundefn
 
 tpExpr testConst;;
 tpStmt testSeq;;
+tpFunDefn testFun;;
