@@ -11,19 +11,19 @@ type environment = {
 let tpOfConst c = match c with
     | (IntV _) -> IntT
     | (BoolV _) -> BoolT
-;; (* Const -> tp *)
+;; (* tpOfConst : Lang.value -> Lang.tp *)
 
 let rec tpOfVar v (env: vardecl list) = match env with
     (* TODO: trouver le type de la variable v dans l'environnement courant*)
     | (Vardecl (tp, vname)::env) when (vname = v) -> tp
     | (Vardecl (_, _)::env) -> tpOfVar v env
     | [] -> failwith ("La variable " ^ v ^ " n'existe pas.")
-;; (* Const -> vardecl list -> tp *)
+;; (* tpOfVar : Lang.vname -> Lang.vardecl list -> Lang.tp *)
 
 let tpOfBinOp c = match c with
     | (BArith ari) -> IntT (* TODO: alg d'unification SI on utiliser les expr arithmetiques sur autre chose que des entiers *)
     | (BCompar comp) -> BoolT (* retourne toujours un booleen*)
-;; (* BinOp -> tp *)
+;; (* tpOfBinOp : Lang.binop -> Lang.tp *)
 
 let rec tpExpr expr env = match expr with
     | Const (_, value) -> Const (tpOfConst value, value)
@@ -43,7 +43,7 @@ let rec tpExpr expr env = match expr with
             IfThenElse (t, tpExpr cond env, tpA, tpB) 
         else
             failwith "Opération mal formée"
-;; (* tpExpr : expr -> expr *)
+;; (* tpExpr : 'a Lang.expr -> Lang.vardecl list -> Lang.tp Lang.expr *)
 
 let rec tpStmt stmt env = match stmt with
     | Skip -> Skip
@@ -54,7 +54,7 @@ let rec tpStmt stmt env = match stmt with
     | Cond (expr, a, b) -> Cond (tpExpr expr env, tpStmt a env, tpStmt b env)
     | While (expr, stmt) -> While (tpExpr expr env, tpStmt stmt env) 
     | Return (expr) -> Return (tpExpr expr env)
-;; (* tpStmt : stmt -> stmt *) 
+;; (* tpStmt : 'a Lang.stmt -> Lang.vardecl list -> Lang.tp Lang.stmt *) 
 
 let rec findVar name (args: vardecl list) = match args with 
     | Vardecl(currName, _)::args -> (currName == name) || (findVar name args)
@@ -79,7 +79,7 @@ let rec verifReturnAccess stmt = match stmt with
     | Seq (_, lastStmt) -> verifReturnAccess lastStmt
     
     | _ -> false
-;;
+;; (* verifReturnAccess : 'a Lang.stmt -> bool  *)
 
 (* Fonction pour verifier que le type de tout retour de fonction est celui attendu *)
 let rec verifReturnsType (stmt: 'a stmt) (tp: Lang.tp) = match stmt with
@@ -89,7 +89,7 @@ let rec verifReturnsType (stmt: 'a stmt) (tp: Lang.tp) = match stmt with
     | Return (expr) -> Lang.tp_of_expr expr == tp
 
     | _ -> true
-;;
+;; (* verifReturnsType : Lang.tp Lang.stmt -> Lang.tp -> bool *)
 
 let stringOfTp = function
     | IntT -> "int"
@@ -97,7 +97,7 @@ let stringOfTp = function
 ;; (* stringOfTp : Lang.tp -> string *)
 
 let rec tpFunDefn fndef = match fndef with
-    | Fundefn (Fundecl (returnTp, fname , vardecl) as fundecl, args, stmt) -> 
+    | Fundefn (Fundecl (returnTp, fname, vardecl) as fundecl, args, stmt) -> 
         (* La fonction ne doit pas avoir de redondance dans les noms de ses arguments *)
         if (verifArgs args) then 
             (* On type le corps de la fonction pour pouvoir verifier le typage des returns *)
