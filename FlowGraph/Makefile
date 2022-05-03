@@ -1,7 +1,7 @@
 all: comp
 
 # Compilation of Ocaml files
-# Attention: order of object files important 
+# Attention: order of object files important
 comp: lang.cmo parser.cmo lexer.cmo typing.cmo\
       instrs.cmo gen.cmo graph.cmo code2graph.cmo interf.cmo comp.cmo
 	ocamlc -o comp $^
@@ -55,5 +55,5 @@ parser.cmo: parser.ml parser.cmi lang.cmo
 
 .PHONY: clean
 
-clean: 
+clean:
 	rm -f lexer.ml parser.ml *.mli *.cmi *.cmo
