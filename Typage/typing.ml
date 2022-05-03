@@ -13,45 +13,47 @@ let tpOfConst c = match c with
     | (BoolV _) -> BoolT
 ;; (* Const -> tp *)
 
-let rec tpOfVar v = 
+let rec tpOfVar v (env: vardecl list) = match env with
     (* TODO: trouver le type de la variable v dans l'environnement courant*)
-    IntT
-;; (* Const -> tp *)
+    | (Vardecl (tp, vname)::env) when (vname = v) -> tp
+    | (Vardecl (_, _)::env) -> tpOfVar v env
+    | [] -> failwith ("La variable " ^ v ^ " n'existe pas.")
+;; (* Const -> vardecl list -> tp *)
 
 let tpOfBinOp c = match c with
     | (BArith ari) -> IntT (* TODO: alg d'unification SI on utiliser les expr arithmetiques sur autre chose que des entiers *)
     | (BCompar comp) -> BoolT (* retourne toujours un booleen*)
 ;; (* BinOp -> tp *)
 
-let rec tpExpr expr = match expr with
+let rec tpExpr expr env = match expr with
     | Const (_, value) -> Const (tpOfConst value, value)
-    | VarE (_, value) -> VarE (tpOfVar   value, value) (* TODO: tpOfVar *)
+    | VarE (_, value) -> VarE (tpOfVar value env, value) (* TODO: tpOfVar *)
     | BinOp (_, comp, a, b) -> 
-        let tpA = tpExpr a and tpB = tpExpr b in
+        let tpA = tpExpr a env and tpB = tpExpr b env in
         (* On vérifie que l'opération est correctement typée *)
         if ((Lang.tp_of_expr tpA) = (Lang.tp_of_expr tpB)) then 
             BinOp (tpOfBinOp comp, comp, tpA, tpB) 
         else
             failwith "Opération mal formée"
     | IfThenElse (_, cond, a, b) -> 
-        let tpA = tpExpr a and tpB = tpExpr b in
+        let tpA = tpExpr a env and tpB = tpExpr b env in
         let t = Lang.tp_of_expr tpA in
         (* On vérifie que l'opération est correctement typée *)
         if (t = (Lang.tp_of_expr tpB)) then 
-            IfThenElse (t, tpExpr cond, tpA, tpB) 
+            IfThenElse (t, tpExpr cond env, tpA, tpB) 
         else
             failwith "Opération mal formée"
 ;; (* tpExpr : expr -> expr *)
 
-let rec tpStmt stmt = match stmt with
+let rec tpStmt stmt env = match stmt with
     | Skip -> Skip
     | Assign (_, vname, expr) -> 
-        let newExpr = tpExpr expr in
+        let newExpr = tpExpr expr env in
         Assign (Lang.tp_of_expr newExpr, vname, newExpr)
-    | Seq (a, b) -> Seq (tpStmt a, tpStmt b)  
-    | Cond (expr, a, b) -> Cond (tpExpr expr, tpStmt a, tpStmt b)
-    | While (expr, stmt) -> While (tpExpr expr, tpStmt stmt) 
-    | Return (expr) -> Return (tpExpr expr)
+    | Seq (a, b) -> Seq (tpStmt a env, tpStmt b env)  
+    | Cond (expr, a, b) -> Cond (tpExpr expr env, tpStmt a env, tpStmt b env)
+    | While (expr, stmt) -> While (tpExpr expr env, tpStmt stmt env) 
+    | Return (expr) -> Return (tpExpr expr env)
 ;; (* tpStmt : stmt -> stmt *) 
 
 let rec findVar name (args: vardecl list) = match args with 
@@ -95,10 +97,11 @@ let stringOfTp = function
 ;; (* stringOfTp : Lang.tp -> string *)
 
 let rec tpFunDefn fndef = match fndef with
-    | Fundefn (Fundecl (returnTp, fname , _) as fundecl, args, stmt) -> 
+    | Fundefn (Fundecl (returnTp, fname , vardecl) as fundecl, args, stmt) -> 
         (* La fonction ne doit pas avoir de redondance dans les noms de ses arguments *)
         if (verifArgs args) then 
-            let stmt = tpStmt stmt in
+            (* On type le corps de la fonction pour pouvoir verifier le typage des returns *)
+            let stmt = tpStmt stmt vardecl in
             (* Le return de la fonction doit être accessible *)
             if (verifReturnAccess stmt) then
                 (* Le return de la fonction doit renvoyer un résultat du type attendu par la fonction *)
