@@ -17,4 +17,6 @@
 let parser = Interf.parse "./Examples/even.c";;
 let typing = Typing.tpFunDefn parser;;
 let generation = Gen.gen_stmt typing;;
-let execution = Instrs.run_code generation;;
+
+Instrs.run_code generation [5];;
+Instrs.run_code generation [6];;

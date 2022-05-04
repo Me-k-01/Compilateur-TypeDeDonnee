@@ -115,11 +115,19 @@ let exec_instr instr_array var_array pc =
     end
   | Goto(jump) ->
     var_array, goto jump pc, 1
-  | Branch(cond, left, right) ->
-      if (get_var var_array cond) = (BoolV true) then
+  | Branch(cond, left, right) -> (
+    match (get_var var_array cond) with
+    | IntV n ->
+      if n = 1 then
         var_array, goto left pc, 1
       else
         var_array, goto right pc, 1
+    | BoolV b ->
+      if b then
+        var_array, goto left pc, 1
+      else
+        var_array, goto right pc, 1
+    )
   | Exit(n) -> (
     match get_var var_array n with
     | IntV(n) -> var_array, n, 0
