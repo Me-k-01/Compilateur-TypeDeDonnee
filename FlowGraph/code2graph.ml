@@ -69,7 +69,7 @@ let string_of_instr_IVar = function
  | Exit a -> "Return" ^ (string_of_instr_IVarIIndex a)
 
 (* prend un noeud en entree, (num instruction, instruction) -> label instruction  *)
-let node_label_display (Node(num, consigne)) = string_of_int(num) ^ " [label= " ^ string_of_instr_IVar consigne ^ "]"
+let node_label_display (Node(num, consigne)) = string_of_int(num) ^ " [label= " ^"\"" ^ string_of_instr_IVar consigne ^ "\"" ^ "]"
 
 
 
@@ -86,7 +86,7 @@ let display_of_code code =
 
   (* ************************************************************ *)
 let display_of_code code =
-  print_string("digraph { \n");
+  print_string("\ndigraph { \n");
   let (Graph((codeNd, codeEd))) = graph_of_code code in
 
   (* Balade dans le tableau des instructions *)
@@ -96,7 +96,7 @@ let display_of_code code =
     | _ -> print_string("")
 
 
-  in parcours node_label_display codeNd; parcours edge_label_display codeEd ;  print_string("}");;
+  in parcours node_label_display codeNd; parcours edge_label_display codeEd ;  print_string("}\n");;
 
 (* ************************************************************ *)
 
