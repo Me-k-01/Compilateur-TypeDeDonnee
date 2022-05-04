@@ -30,6 +30,7 @@ rule token = parse
 | "/*"
     {  level:=1; comment lexbuf }    (* comment --> ignore *)
 | "//" { commentLigne lexbuf}
+| "#" { commentLigne lexbuf}
     
     
 (*Retour des valeurs*)
