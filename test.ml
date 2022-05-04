@@ -14,9 +14,16 @@
 #load "gen.cmo";;
 #load "instrs.cmo";;
 
+#load "code2graph.cmo";;
+#load "graph.cmo";;
+
 let parser = Interf.parse "./Examples/even.c";;
 let typing = Typing.tpFunDefn parser;;
 let generation = Gen.gen_stmt typing;;
+
+Code2graph.graph_of_code generation;;
+Code2graph.display_of_code generation;;
+
 
 Instrs.run_code generation [5];;
 Instrs.run_code generation [6];;
