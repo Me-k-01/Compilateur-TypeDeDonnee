@@ -14,18 +14,18 @@ type bcompar = BCeq | BCge | BCgt | BCle | BClt | BCne
 
 (* binary operators, combining all of the above *)
 type binop =
-  | BArith of barith
-  | BCompar of bcompar
+  BArith of barith
+| BCompar of bcompar
 
     
 type value =
-  | BoolV of bool
+    BoolV of bool
   | IntV of int
 
 (* expresssions. 
    The type parameter 'a is instantiated during type inference *)
 type 'a expr = 
-  | Const of 'a * value                           (* constant *)
+    Const of 'a * value                           (* constant *)
   | VarE of 'a * vname                            (* variable *)
   | BinOp of 'a * binop * ('a expr) * ('a expr)   (* binary operation *)
   | IfThenElse of 'a * ('a expr) * ('a expr) * ('a expr) (* if - then - else *)
@@ -33,7 +33,7 @@ type 'a expr =
       
 (* auxiliary function; extracts the type component of an expression *)
 let tp_of_expr = function
-  | Const (t, _) -> t
+    Const (t, _) -> t
   | VarE (t, _) -> t
   | BinOp (t, _, _, _) -> t
   | IfThenElse (t, _, _, _) -> t
