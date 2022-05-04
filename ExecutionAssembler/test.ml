@@ -42,4 +42,12 @@ let instructions2 = [| (* my instructions *)
   Exit (IIndex 1)
 |];;
 
+run_code instructions2 [0];;
+run_code instructions2 [1];;
 run_code instructions2 [2];;
+run_code instructions2 [3];;
+run_code instructions2 [4];;
+
+run_code instructions2 [-1];;
+run_code instructions2 [-2];;
+run_code instructions2 [-3];;

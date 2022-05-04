@@ -116,7 +116,7 @@ let exec_instr instr_array var_array pc =
   | Goto(jump) ->
     var_array, goto jump pc, 1
   | Branch(cond, left, right) ->
-      if (get_var var_array cond) = (IntV 0) then
+      if (get_var var_array cond) = (BoolV true) then
         var_array, goto left pc, 1
       else
         var_array, goto right pc, 1
