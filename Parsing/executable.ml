@@ -1,4 +1,4 @@
 #use "use.ml";;
 open Lang;;
 
-Interf.parse "../Examples/simple.c" ;;
+Interf.parse "../Examples/somme.c" ;;

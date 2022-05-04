@@ -354,7 +354,7 @@ let yyact = [|
     let _3 = (Parsing.peek_val __caml_parser_env 0 : 'expression) in
     Obj.repr(
 # 104 "Parsing/parser.mly"
-                                  ( BinOp(0, BCompar BCgt, _1 , _3 ) )
+                                  ( BinOp(0, BCompar BCle, _1 , _3 ) )
 # 359 "Parsing/parser.ml"
                : 'binary_operation))
 ; (fun __caml_parser_env ->
@@ -362,7 +362,7 @@ let yyact = [|
     let _3 = (Parsing.peek_val __caml_parser_env 0 : 'expression) in
     Obj.repr(
 # 105 "Parsing/parser.mly"
-                                  ( BinOp(0, BCompar BCle, _1 , _3 ) )
+                                  ( BinOp(0, BCompar BCgt, _1 , _3 ) )
 # 367 "Parsing/parser.ml"
                : 'binary_operation))
 ; (fun __caml_parser_env ->
