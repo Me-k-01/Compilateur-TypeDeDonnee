@@ -10,29 +10,29 @@ main.cmo: main.ml lang.cmo parser.cmo lexer.cmo interf.cmo typing.cmo gen.cmo in
 
 #### Compilation of files
 
-lang.cmo: ./SimpleParser/lang.ml
+lang.cmo: ./Parsing/lang.ml
 	ocamlc -o lang.cmo -c $<
 
-interf.cmo: ./SimpleParser/interf.ml lexer.cmo parser.cmo
+interf.cmo: ./Parsing/interf.ml lexer.cmo parser.cmo
 	ocamlc -o interf.cmo -c $<
 
 # Parser files
 
-parser.ml: ./SimpleParser/parser.mly lang.cmo
+parser.ml: ./Parsing/parser.mly lang.cmo
 	ocamlyacc -v $<
 
-parser.mli: ./SimpleParser/parser.mly lang.cmo
+parser.mli: ./Parsing/parser.mly lang.cmo
 	ocamlyacc -v $<
-	mv ./SimpleParser/parser.mli .
+	mv ./Parsing/parser.mli .
 
-parser.cmo: ./SimpleParser/parser.ml parser.cmi lang.cmo
+parser.cmo: ./Parsing/parser.ml parser.cmi lang.cmo
 	ocamlc -o parser.cmo -c $<
 
 # Lex files
 
-lexer.ml: ./SimpleParser/lexer.mll lang.cmo
+lexer.ml: ./Parsing/lexer.mll lang.cmo
 	ocamllex $<
-	mv ./SimpleParser/lexer.ml .
+	mv ./Parsing/lexer.ml .
 
 lexer.cmo: ./lexer.ml parser.cmo
 	ocamlc -o lexer.cmo -c $<
@@ -40,7 +40,7 @@ lexer.cmo: ./lexer.ml parser.cmo
 
 # Typing file
 
-typing.cmo: ./Typage/typing.ml lang.cmo
+typing.cmo: ./Typing/typing.ml lang.cmo
 	ocamlc -o typing.cmo -c $<
 
 # Generation Assembler files

@@ -112,17 +112,22 @@ let exec_instr instr_array var_array pc =
   | Store(index, expr) ->
     begin
       set_var var_array index expr;
-      var_array, pc + 1
+      var_array, pc + 1, 1
     end
   | Goto(jump) ->
-    var_array, goto jump pc
+    var_array, goto jump pc, 1
   | Branch(cond, left, right) ->
       if (get_var var_array cond) = (IntV 0) then
-        var_array, goto left pc
+        var_array, goto left pc, 1
       else
-        var_array, goto right pc
-  | Exit(n) ->
-    var_array, -1
+        var_array, goto right pc, 1
+  | Exit(n) -> (
+    match get_var var_array n with
+    | IntV(n) -> var_array, n, 0
+    | BoolV(true) -> var_array, 1, 0
+    | BoolV(false) -> var_array, 0, 0
+    )
+    
 ;;
 
 
@@ -131,12 +136,12 @@ let run_code configuration = (* configuration = instructions *)
   and pc = 0
   and exec = exec_instr configuration in
   
-  let rec run (array, pc) =
-    if pc = -1 then array, pc
+  let rec run (array, pc, status) =
+    if status = 0 then pc
     else run (exec array pc)
   in
 
-  run (array, pc)
+  run (array, pc, 1)
 ;;
 
 

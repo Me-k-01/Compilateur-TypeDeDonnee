@@ -1,7 +1,8 @@
 *.cmo
 *.cmi
 
-lexer.ml
-parser.mli
+*lexer.ml
+*parser.mli
 
-compiler
+*compiler
+*comp
