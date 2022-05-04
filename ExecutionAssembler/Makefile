@@ -6,7 +6,7 @@ comp: lang.cmo instrs.cmo
 	ocamlc -o comp $^
 
 # Compilation of .ml files
-lang.cmo: ../FlowGraph/lang.ml
+lang.cmo: ../Parsing/lang.ml
 	ocamlc -o lang.cmo -c $<
 
 instrs.cmo: instrs.ml lang.cmo

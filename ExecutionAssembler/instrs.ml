@@ -45,27 +45,23 @@ type exec_result =
 | Continue of (int array) * int
 ;;
 
-(*
-let get_instr instr var_array =
-match instr with
-| IVarNamed(name) -> 0 (* a changer *)
-| IVarNum(v) -> v
+
+let get_var var_array var = 
+  match var with
+  | IIndex(index) -> var_array.(index)
+  | _ -> failwith "This function can not be used with IVarNum and IVarNamed."
 ;;
-*)
-
-
-let get_var var_array (IIndex index) = var_array.(index);;
 
 let operateArith v w operator =
   match (v, w) with
   | (IntV v, IntV w) -> IntV(operator v w)
-  | _ -> failwith "First and second parameters must be IntV"
+  | _ -> failwith "First and second parameters must be IntV."
 ;;
 let operateCompar v w operator =
   match (v, w) with
   | (IntV _, IntV _) -> BoolV(operator v w)
   | (BoolV _, BoolV _) -> BoolV(operator v w)
-  | _ -> failwith "First and second parameteres must be of the same Constructor"
+  | _ -> failwith "First and second parameteres must be of the same Constructor."
 ;;
 
 (* execute an expression *)
@@ -94,9 +90,12 @@ let rec exec_expr var_array expr =
   )
 ;;
 
-let set_var var_array (IIndex index) expr =
-  let result = exec_expr var_array expr in
-  Array.set var_array index result
+let set_var var_array var expr =
+  match var with
+  | IIndex(index) ->
+    let result = exec_expr var_array expr in
+    Array.set var_array index result
+  | _ -> failwith "This function can not be used with IVarNum and IVarNamed."
 ;;
 
 let goto jump pc =
@@ -137,7 +136,7 @@ let run_code configuration = (* configuration = instructions *)
   and exec = exec_instr configuration in
   
   let rec run (array, pc, status) =
-    if status = 0 then pc
+    if status = 0 then array, pc
     else run (exec array pc)
   in
 

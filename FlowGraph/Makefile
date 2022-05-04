@@ -6,11 +6,11 @@ comp: lang.cmo instrs.cmo graph.cmo code2graph.cmo
 	ocamlc -o comp $^
 
 # Compilation of .ml files
-lang.cmo: lang.ml
-	ocamlc -c $<
+lang.cmo: ../Parsing/lang.ml
+	ocamlc -o lang.cmo -c $<
 
-instrs.cmo: instrs.ml lang.cmo
-	ocamlc -c $<
+instrs.cmo: ../ExecutionAssembler/instrs.ml lang.cmo
+	ocamlc -o instrs.cmo -c $<
 
 
 graph.cmo: graph.ml
