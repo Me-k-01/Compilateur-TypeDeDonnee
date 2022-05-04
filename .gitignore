@@ -2,7 +2,8 @@
 *.cmi
 
 *lexer.ml
-*parser.mli
+*parser.mly
 
 *compiler
 *comp
+*execParser
