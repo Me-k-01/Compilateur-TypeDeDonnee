@@ -101,8 +101,8 @@ binary_operation :
 /*Binary comparison operator*/
 | expression BC_EG expression     { BinOp(0, BCompar BCeq, $1 , $3 ) }
 | expression BC_SUP_EG expression { BinOp(0, BCompar BCge, $1 , $3 ) }
-| expression BC_INF_EG expression { BinOp(0, BCompar BCgt, $1 , $3 ) }
-| expression BC_SUP expression    { BinOp(0, BCompar BCle, $1 , $3 ) }
+| expression BC_INF_EG expression { BinOp(0, BCompar BCle, $1 , $3 ) }
+| expression BC_SUP expression    { BinOp(0, BCompar BCgt, $1 , $3 ) }
 | expression BC_INF expression    { BinOp(0, BCompar BClt, $1 , $3 ) }
 | expression BC_DIF expression    { BinOp(0, BCompar BCne, $1 , $3 ) }
 ;
