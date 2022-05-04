@@ -130,9 +130,17 @@ let exec_instr instr_array var_array pc =
 ;;
 
 
-let run_code configuration = (* configuration = instructions *)
-  let array = [|IntV 0; IntV 0; IntV 0; IntV 0; IntV 0; IntV 0; IntV 0|]
-  and pc = 0
+let run_code configuration arguments = (* configuration = instructions *)
+  let array = [|IntV 0; IntV 0; IntV 0; IntV 0; IntV 0; IntV 0; IntV 0|] in
+
+  let rec put_arguments_in_array array arguments n =
+    match arguments with
+    | e::l ->  Array.set array n (IntV(e)); put_arguments_in_array array l (n + 1)
+    | _ -> ()
+  in
+  let () = put_arguments_in_array array arguments 0 in
+
+  let pc = 0
   and exec = exec_instr configuration in
   
   let rec run (array, pc, status) =
