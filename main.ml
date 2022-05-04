@@ -47,6 +47,8 @@ let print_array array =
   print_array array
 ;;
 
+Code2graph.display_of_code generation;;
+print_string("\n\n");;
 
 let variables, returned_value = execution;;
 

@@ -54,6 +54,7 @@ let string_of_instrExprBin binop = match binop with
 
 let string_of_instr_IVarIIndex = function
   | IIndex a -> "V" ^ string_of_int(a)
+  | _ -> failwith "code2graph forget matching"
 
 let string_of_instrExpr expr = match expr with
  | VarSE ( a ) -> string_of_instr_IVarIIndex(a)
@@ -197,7 +198,7 @@ let instructions = [|
   Exit ( IIndex 1)
  |];;
 
-graph_of_code instructions;;
+(*graph_of_code instructions;;*)
 (*
 Graph
  ([Node (20, Exit (IIndex 1));
@@ -227,10 +228,10 @@ Graph
   Edge (3, 5, "BranchIf true"); Edge (3, 4, "BranchIf false");
   Edge (2, 3, ""); Edge (1, 2, ""); Edge (0, 1, "")])
 *)
-
+(*
 node_label_display (Node (20, Exit (IIndex 1)));;
 
 edge_label_display (Edge (19, 20, ""));;
 
 
-display_of_code instructions;;
+display_of_code instructions;;*)
