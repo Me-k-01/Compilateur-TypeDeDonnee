@@ -17,14 +17,10 @@ type ('l, 'v) instr =
 | Exit of 'v                    (* return from function leaving result in variable *)
 ;;
 
-(*
+
 type instr_var =
 | IVarNamed of vname
 | IVarNum of int
-;;
-*)
-
-type instr_var =
 | IIndex of int
 ;;
 
